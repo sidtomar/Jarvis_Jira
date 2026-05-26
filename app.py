@@ -401,9 +401,9 @@ with st.sidebar:
 
     uploaded_files = st.file_uploader(
         "Upload additional docs",
-        type=["pdf", "docx", "txt", "md"],
+        type=["pdf", "docx", "pptx", "txt", "md"],
         accept_multiple_files=True,
-        help="Upload PDF, DOCX, TXT or MD files. These will be merged with pre-loaded docs.",
+        help="Upload PDF, DOCX, PPTX, TXT or MD files. These will be merged with pre-loaded docs.",
         key="doc_uploader",
         label_visibility="visible",
     )
@@ -599,11 +599,13 @@ with st.container():
             help="How many Jira user stories should the agent generate?",
         )
     with col_b:
+        has_stories = bool(st.session_state.generated_stories)
         generate_btn = st.button(
-            "⚡ Generate Stories",
-            type="primary",
+            "✅ Stories Generated" if has_stories else "⚡ Generate Stories",
+            type="secondary" if has_stories else "primary",
             use_container_width=True,
             key="generate_btn",
+            disabled=has_stories,
         )
     with col_c:
         clear_btn = st.button(

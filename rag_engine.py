@@ -38,6 +38,31 @@ def _load_txt(path: str) -> List[Document]:
     return loader.load()
 
 
+def _load_pptx(path: str) -> List[Document]:
+    from pptx import Presentation
+    prs = Presentation(path)
+    slides_text = []
+    for i, slide in enumerate(prs.slides, 1):
+        texts = []
+        for shape in slide.shapes:
+            if shape.has_text_frame:
+                for paragraph in shape.text_frame.paragraphs:
+                    text = paragraph.text.strip()
+                    if text:
+                        texts.append(text)
+            if shape.has_table:
+                for row in shape.table.rows:
+                    row_text = " | ".join(cell.text.strip() for cell in row.cells)
+                    if row_text.strip(" |"):
+                        texts.append(row_text)
+        if texts:
+            slides_text.append(Document(
+                page_content=f"Slide {i}:\n" + "\n".join(texts),
+                metadata={"slide_number": i},
+            ))
+    return slides_text
+
+
 def _load_file(path: str) -> List[Document]:
     """Route to the correct loader based on file extension."""
     ext = Path(path).suffix.lower()
@@ -45,6 +70,8 @@ def _load_file(path: str) -> List[Document]:
         return _load_pdf(path)
     elif ext in (".docx", ".doc"):
         return _load_docx(path)
+    elif ext == ".pptx":
+        return _load_pptx(path)
     elif ext in (".txt", ".md", ".rst"):
         return _load_txt(path)
     else:
@@ -62,7 +89,7 @@ def load_docs_from_folder(folder: str = "docs") -> List[Document]:
         return []
 
     all_docs: List[Document] = []
-    supported = {".pdf", ".docx", ".doc", ".txt", ".md", ".rst"}
+    supported = {".pdf", ".docx", ".doc", ".pptx", ".txt", ".md", ".rst"}
 
     for file_path in docs_path.iterdir():
         if file_path.suffix.lower() in supported and not file_path.name.startswith("."):
