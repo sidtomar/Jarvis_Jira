@@ -29,38 +29,48 @@ AVAILABLE_MODELS = {
 DEFAULT_EMBEDDING_MODEL = "openai/text-embedding-3-small"
 
 
+def get_setting(key: str, default: str = "") -> str:
+    try:
+        import streamlit as st
+        if key in st.secrets:
+            return str(st.secrets[key])
+    except Exception:
+        pass
+    return os.environ.get(key, default)
+
+
 class Settings:
-    """Central settings class — reads from environment variables."""
+    """Central settings class — reads from Streamlit secrets or environment variables."""
 
     # ── OpenRouter ────────────────────────────────────────────────────────────
     @property
     def openrouter_api_key(self) -> str:
-        return os.environ.get("OPENROUTER_API_KEY", "")
+        return get_setting("OPENROUTER_API_KEY", "")
 
     @property
     def default_model(self) -> str:
-        return os.environ.get("OPENROUTER_MODEL", "openai/gpt-4o")
+        return get_setting("OPENROUTER_MODEL", "openai/gpt-4o")
 
     # ── Jira ──────────────────────────────────────────────────────────────────
     @property
     def jira_base_url(self) -> str:
-        return os.environ.get("JIRA_BASE_URL", "").rstrip("/")
+        return get_setting("JIRA_BASE_URL", "").rstrip("/")
 
     @property
     def jira_email(self) -> str:
-        return os.environ.get("JIRA_EMAIL", "")
+        return get_setting("JIRA_EMAIL", "")
 
     @property
     def jira_api_token(self) -> str:
-        return os.environ.get("JIRA_API_TOKEN", "")
+        return get_setting("JIRA_API_TOKEN", "")
 
     @property
     def jira_project_key(self) -> str:
-        return os.environ.get("JIRA_PROJECT_KEY", "")
+        return get_setting("JIRA_PROJECT_KEY", "")
 
     @property
     def jira_issue_type(self) -> str:
-        return os.environ.get("JIRA_ISSUE_TYPE", "Story")
+        return get_setting("JIRA_ISSUE_TYPE", "Story")
 
     # ── Derived helpers ────────────────────────────────────────────────────────
     @property
